@@ -51,7 +51,3 @@ def get_text_from_url(url: str) -> str:
                 words = words.encode('utf-8')
                 result = result + words.decode("utf-8") + '\n'
         return result
-
-
-if __name__ == '__main__':
-    print(get_text_from_url(url="https://www.trypplea.com"))
