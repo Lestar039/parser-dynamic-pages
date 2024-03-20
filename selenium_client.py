@@ -2,9 +2,16 @@ import contextlib
 import time
 
 import lxml.html as LH
-import lxml.html.clean as clean
 import selenium.webdriver as webdriver
 from selenium.webdriver.chrome.options import Options
+from lxml.html.clean import Cleaner
+
+
+class CustomCleaner(Cleaner):
+    def __init__(self, *args, **kwargs):
+        super().__init__(**kwargs)
+        self.safe_attrs_only = False
+        self.kill_tags = ['script', 'noscript', 'style', 'footer', 'header', 'nav']
 
 
 def get_text_from_url(url: str) -> str:
@@ -30,16 +37,13 @@ def get_text_from_url(url: str) -> str:
 
         # parse settings
         content = browser.page_source
-        cleaner = clean.Cleaner()
+        cleaner = CustomCleaner()
         content = cleaner.clean_html(content)
         doc = LH.fromstring(content)
-        ignore_tags = ('script', 'noscript', 'style', 'footer', 'header')
 
         # parsing
         result = ""
         for elt in doc.iterdescendants():
-            if elt.tag in ignore_tags:
-                continue
             text = elt.text or ''
             tail = elt.tail or ''
             words = ' '.join((text, tail)).strip()
@@ -47,3 +51,7 @@ def get_text_from_url(url: str) -> str:
                 words = words.encode('utf-8')
                 result = result + words.decode("utf-8") + '\n'
         return result
+
+
+if __name__ == '__main__':
+    print(get_text_from_url(url="https://www.trypplea.com"))
